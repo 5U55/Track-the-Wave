@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Text, View, LogBox, ScrollView, Pressable, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { TextInput, TouchableWithoutFeedback, Text, View, LogBox, ScrollView, Pressable, Image, StyleSheet, TouchableOpacity, Keyboard} from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -74,6 +74,11 @@ function getTrackerHue(mood, energy) {
   else if (energy == '-1') return '#c9c8c7' //gr
 }
 
+function getSleepHue(sleep){
+  if(sleep == '-1')  return '#c9c8c7'
+  else return 'black'
+}
+
 const getDataForDateRange = async (dateRange) => {
   try {
     const keys = await getAllKeys();
@@ -92,17 +97,7 @@ const getDataForDateRange = async (dateRange) => {
   }
 };
 
-clearAll = async () => {
-  try {
-    await AsyncStorage.clear()
-  } catch (e) {
-    // clear error
-  }
-
-  console.log('Done.')
-}
-
-getAllKeys = async () => {
+const getAllKeys = async () => {
   let keys = []
   try {
     keys = await AsyncStorage.getAllKeys()
@@ -204,7 +199,7 @@ const HomeScreen = ({ navigation }) => {
               style={{
                 width: 25,
                 height: (value.sleep + 2) * 5,
-                backgroundColor: "black",
+                backgroundColor: getSleepHue(value.sleep),
                 marginRight: 10,
                 borderRadius:10
               }}
@@ -233,7 +228,8 @@ const HomeScreen = ({ navigation }) => {
       getEntries();
     }, [])
   );
-
+  
+  const scrollViewRef = useRef();
   return (
     <View>
       
@@ -256,8 +252,8 @@ const HomeScreen = ({ navigation }) => {
         <ScrollView contentContainerStyle={{
           alignItems: 'center',
           padding: 10
-        }} horizontal={true} ref={ref => scrollView = ref}
-          onContentSizeChange={() => scrollView.scrollToEnd({ animated: true })}>
+        }} horizontal={true} ref={scrollViewRef}
+        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}>
           <View>
 
             <View style={{
@@ -337,6 +333,7 @@ const EntryScreen = ({ route, navigation }) => {
     handleSubmit()
   }
   return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
       <View style={{
         justifyContent: 'center',
@@ -371,10 +368,10 @@ const EntryScreen = ({ route, navigation }) => {
           <DateTimePicker
             value={date}
             mode="date"
-            display={Platform.OS === 'ios' ? 'calendar' : 'default'}
+            display={'calendar'}
             onChange={onDateChange}
             maximumDate={new Date}
-            style={{ width: 125, height: 100 }}
+            style={{ width: 125, height: 50 }}
           /></View>
       )}
 
@@ -405,7 +402,7 @@ const EntryScreen = ({ route, navigation }) => {
         maximumTrackTintColor="#000000"
       />
 
-      <Text>sleep: {sleep}</Text>
+      <Text>Sleep: {sleep}</Text>
       <Slider
         style={{ width: 300, height: 40 }}
         minimumValue={0}
@@ -417,7 +414,17 @@ const EntryScreen = ({ route, navigation }) => {
         minimumTrackTintColor="#FFFFFF"
         maximumTrackTintColor="#000000"
       />
+      <Text>Notes:</Text>
+       <ScrollView style={{padding:15}}>
+<TextInput
+        style={{ height: 50, width:300, borderColor: 'gray', borderWidth: 1, padding: 5}}
+        onChangeText={setNotes}
+        value={notes}
+        multiline
+        placeholder="Notes about your day..."
+      />
 
+</ScrollView>
       <TouchableOpacity style={{backgroundColor: '#5587ab',
     borderWidth: 3,
     height: 50,
@@ -428,6 +435,7 @@ const EntryScreen = ({ route, navigation }) => {
     width: 110, justifyContent: 'center', alignItems: 'center', borderRadius:10}} onPress={clearDay}><Text style={{color:"black"}}>CLEAR DAY</Text></TouchableOpacity>
 
     </View>
+    </TouchableWithoutFeedback>
   );
 };
 
