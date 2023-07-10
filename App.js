@@ -346,7 +346,7 @@ const EntryScreen = ({ route, navigation }) => {
             height: 300,
           }}
           source={{
-            url: 'https://cdn.glitch.global/c1e8e5f1-e523-49a5-83f3-215e021d3fa2/574ADA3F-95FB-4E39-BB95-3261D55663F8.jpeg?v=1681766657356',
+            uri: 'https://cdn.glitch.global/c1e8e5f1-e523-49a5-83f3-215e021d3fa2/574ADA3F-95FB-4E39-BB95-3261D55663F8.jpeg?v=1681766657356',
           }}
           resizeMode="contain"
         />
